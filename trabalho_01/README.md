@@ -24,11 +24,11 @@ Cada item tem sua própria pasta porque usa um protocolo próprio. Há também t
 
 ## 3. Preparação
 
-Execute os comandos **a partir da raiz do projeto** (`trabalho_01/`) e use `python3 -m pacote.modulo`, sem escrever `.py` no fim.
+Execute os comandos **a partir da raiz do projeto** (`trabalho_01/`) e use `python -m pacote.modulo`, sem escrever `.py` no fim.
 
 ```bash
 cd caminho/para/trabalho_01
-python3 --version
+python --version
 ```
 
 ## 4. Estrutura do projeto
@@ -125,26 +125,26 @@ Os seis arquivos **não são seis implementações do stream**: são programas q
 
 ```bash
 # 1-b: saída padrão
-python3 -m demos_stream.q1b
+python -m demos_stream.q1b
 
 # 1-b + 2-b: saída padrão ligada à entrada padrão por um pipe
-python3 -m demos_stream.q1b | python3 -m demos_stream.q2b
+python -m demos_stream.q1b | python -m demos_stream.q2b
 
 # 1-c: grava dados/pecas.bin
-python3 -m demos_stream.q1c
+python -m demos_stream.q1c
 
 # 2-c: lê o arquivo (rode q1c antes)
-python3 -m demos_stream.q2c
+python -m demos_stream.q2c
 
 # 2-b com arquivo redirecionado para a entrada padrão
-python3 -m demos_stream.q2b < dados/pecas.bin
+python -m demos_stream.q2b < dados/pecas.bin
 ```
 
 **1-d + 2-d (TCP, porta `5051`), em dois terminais:**
 
 ```bash
-python3 -m demos_stream.q2d    # terminal 1: servidor que recebe
-python3 -m demos_stream.q1d    # terminal 2: cliente que envia
+python -m demos_stream.q2d    # terminal 1: servidor que recebe
+python -m demos_stream.q1d    # terminal 2: cliente que envia
 ```
 
 O servidor deve mostrar as cinco peças recebidas. Esse servidor espera o formato binário dos streams; ele **não** entende as mensagens JSON do item 3.
@@ -213,13 +213,13 @@ Os campos de `resultado` dependem da operação executada.
 
 ```bash
 # Terminal 1 — servidor (porta 5050)
-python3 -m serialization.server
+python -m serialization.server
 
 # Terminal 2 — demonstração automática
-python3 -m serialization.client --demo
+python -m serialization.client --demo
 
 # Ou o menu interativo
-python3 -m serialization.client
+python -m serialization.client
 ```
 
 O modo `--demo` lista peças, adiciona uma camiseta, vende unidades, mostra uma venda inválida por falta de estoque e consulta o total de vendas.
@@ -276,19 +276,19 @@ Como várias threads do servidor publicam ao mesmo tempo, o contador de sequênc
 **Demonstração automática** (servidor + 3 clientes, leave/join e rajada concorrente):
 
 ```bash
-python3 -m multicast.demo
+python -m multicast.demo
 ```
 
 **Manual, em vários terminais:**
 
 ```bash
 # Terminal 1 — servidor (console do administrador + simulação da loja a cada 5 s)
-python3 -m multicast.servidor
+python -m multicast.servidor
 
 # Terminais 2, 3, 4... — um cliente por terminal
-python3 -m multicast.cliente --usuario ana --senha 123
-python3 -m multicast.cliente --usuario bruno --senha 123
-python3 -m multicast.cliente --usuario carla --senha 123 --auto 60   # só escuta por 60 s
+python -m multicast.cliente --usuario ana --senha 123
+python -m multicast.cliente --usuario bruno --senha 123
+python -m multicast.cliente --usuario carla --senha 123 --auto 60   # só escuta por 60 s
 ```
 
 Usuários: `ana`, `bruno`, `carla`, `davi` (senha `123`) e `admin` (senha `admin`).
@@ -325,20 +325,20 @@ Comandos do console do servidor: `n <texto>` (NOTIFICACAO), `a <texto>` (ALERTA)
 **Demonstração automática** (prazo de 4 s, 5 eleitores votando em paralelo, erros esperados e resultado final):
 
 ```bash
-python3 -m votacao.demo
+python -m votacao.demo
 ```
 
 **Manual:**
 
 ```bash
 # Terminal 1 — servidor com 2 minutos de votação
-python3 -m votacao.servidor --duracao 120
+python -m votacao.servidor --duracao 120
 
 # Terminal 2 — administrador
-python3 -m votacao.cliente --usuario admin --senha admin
+python -m votacao.cliente --usuario admin --senha admin
 
 # Terminais 3, 4... — eleitores (eleitor1 até eleitor10, senha 123)
-python3 -m votacao.cliente --usuario eleitor1 --senha 123
+python -m votacao.cliente --usuario eleitor1 --senha 123
 ```
 
 Use `--verboso` no cliente para ver as mensagens empacotadas e desempacotadas.
@@ -346,7 +346,7 @@ Use `--verboso` no cliente para ver as mensagens empacotadas e desempacotadas.
 ## 10. Testes automatizados
 
 ```bash
-python3 -m unittest discover -s tests -t . -v
+python -m unittest discover -s tests -t . -v
 ```
 
 | Arquivo | O que verifica |
@@ -361,12 +361,12 @@ python3 -m unittest discover -s tests -t . -v
 | Sintoma | Possível causa e solução |
 |---|---|
 | `ModuleNotFoundError` | Confira se está na raiz `trabalho_01/` e use os nomes reais dos pacotes. |
-| `python -m demos_stream.q1b.py` falha | Com `-m`, não se usa `.py`: execute `python3 -m demos_stream.q1b`. |
+| `python -m demos_stream.q1b.py` falha | Com `-m`, não se usa `.py`: execute `python -m demos_stream.q1b`. |
 | `ConnectionRefusedError` | O servidor correspondente não está rodando ou o endereço/porta não confere. |
 | `Address already in use` | Já existe um processo usando a porta; encerre-o ou escolha outra. |
 | `Falha ao receber: O fluxo terminou antes de chegarem todos os bytes esperados` | O receptor lê um protocolo diferente do enviado, ou a conexão fechou antes do fim. Use `q1d` com `q2d` (binário) e `serialization.client` com `serialization.server` (JSON). |
 | `q2b` parece parado | Está aguardando bytes na entrada padrão; use o pipe ou o redirecionamento de arquivo. |
-| `dados/pecas.bin` não existe | Execute primeiro `python3 -m demos_stream.q1c`. |
+| `dados/pecas.bin` não existe | Execute primeiro `python -m demos_stream.q1c`. |
 | A demo de serialização acusa código duplicado | O servidor mantém o estado em memória; reinicie-o para voltar aos dados iniciais. |
 | Cliente multicast autentica mas não recebe nada | Firewall bloqueando UDP, rede sem multicast (comum em Wi-Fi) ou interface errada: tente `--interface IP_LOCAL` no cliente e no servidor. Na mesma máquina funciona pela interface local. |
 | Votação recusa votos logo no início | O prazo (`--duracao`) já terminou; reinicie o servidor com um prazo maior. |

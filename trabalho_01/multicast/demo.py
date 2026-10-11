@@ -11,7 +11,7 @@ cliente com a sua própria thread de escuta multicast, e executa o roteiro:
   5. bruno volta ao grupo -> todos recebem a ATUALIZACAO final;
   6. tentativa de login com senha errada é recusada pelo servidor.
 
-Executar:  python3 -m multicast.demo
+Executar:  python -m multicast.demo
 """
 
 import sys

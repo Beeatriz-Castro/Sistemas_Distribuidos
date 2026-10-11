@@ -8,8 +8,8 @@ QUESTÃO 4 - Cliente de notificações da loja.
        - "interacao-usuario" : lê comandos do teclado (entrar/sair do grupo etc.).
 
 Executar (abra quantos terminais quiser, um cliente por terminal):
-    python3 -m multicast.cliente --usuario ana --senha 123
-    python3 -m multicast.cliente --usuario bruno --senha 123 --auto 30   (sem teclado)
+    python -m multicast.cliente --usuario ana --senha 123
+    python -m multicast.cliente --usuario bruno --senha 123 --auto 30   (sem teclado)
 """
 
 import argparse

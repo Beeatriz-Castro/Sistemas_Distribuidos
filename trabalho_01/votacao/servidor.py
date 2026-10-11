@@ -22,7 +22,7 @@ Operações (request {"operacao", "argumentos"}):
     ENVIAR_NOTA         token, texto           (admin -> multicast)
     LOGOUT              token
 
-Executar:  python3 -m votacao.servidor --duracao 120
+Executar:  python -m votacao.servidor --duracao 120
 """
 
 import argparse

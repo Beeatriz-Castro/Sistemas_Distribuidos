@@ -1,6 +1,6 @@
 """
 Q2-d: origem = cliente remoto (TCP).  Este programa é o SERVIDOR que recebe.
-    python3 -m demos_stream.q2d [porta]     
+    python -m demos_stream.q2d [porta]     
 """
 
 import socket

@@ -9,8 +9,8 @@ QUESTÃO EXTRA - Cliente do sistema de votação (eleitor ou administrador).
      ou de administrador (adicionar/remover candidatos, enviar nota, resultado).
 
 Executar:
-    python3 -m votacao.cliente --usuario eleitor1 --senha 123
-    python3 -m votacao.cliente --usuario admin --senha admin
+    python -m votacao.cliente --usuario eleitor1 --senha 123
+    python -m votacao.cliente --usuario admin --senha admin
 """
 
 import argparse

@@ -15,8 +15,8 @@ Todas elas chamam publicar() ao mesmo tempo; o número de sequência é protegid
 por uma trava.
 
 Executar:
-    python3 -m multicast.servidor                    (console + simulação da loja)
-    python3 -m multicast.servidor --intervalo 0      (sem simulação automática)
+    python -m multicast.servidor                    (console + simulação da loja)
+    python -m multicast.servidor --intervalo 0      (sem simulação automática)
 """
 
 import argparse

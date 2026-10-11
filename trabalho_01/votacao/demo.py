@@ -9,7 +9,7 @@ Roteiro (servidor com prazo curto, tudo no mesmo processo):
      eleitor tentando adicionar candidato, resultado pedido antes do prazo;
   4. o prazo termina: voto atrasado é recusado e o resultado final é exibido.
 
-Executar:  python3 -m votacao.demo
+Executar:  python -m votacao.demo
 """
 
 import threading

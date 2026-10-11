@@ -72,7 +72,7 @@ class TesteStreams(unittest.TestCase):
         self.assertEqual(_resumo(recebidas), _resumo(self.pecas))
 
     def test_pipe_saida_padrao_para_entrada_padrao(self):
-        """1-b + 2-b: python3 -m demos_stream.q1b | python3 -m demos_stream.q2b"""
+        """1-b + 2-b: python -m demos_stream.q1b | python -m demos_stream.q2b"""
         produtor = subprocess.run([sys.executable, "-m", "demos_stream.q1b"], cwd=RAIZ,
                                   capture_output=True, check=True)
         consumidor = subprocess.run([sys.executable, "-m", "demos_stream.q2b"], cwd=RAIZ,
