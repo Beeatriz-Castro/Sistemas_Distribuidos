@@ -7,19 +7,7 @@ Camadas de uma mensagem:
   2) dict    ->  bytes JSON      (empacotar()       /  desempacotar())
   3) bytes   ->  socket TCP      (enviar()          /  receber())
 
-Formato externo escolhido: JSON em UTF-8 (texto legível, independente de
-linguagem/plataforma - mesma ideia do XML visto no slide).
-
-TCP é um FLUXO de bytes, sem fronteiras entre mensagens. Por isso cada
-mensagem vai precedida de 4 bytes com o seu tamanho:
-
-    +----------------+---------------------------+
-    | tamanho (4 B)  |  corpo JSON (tamanho B)   |
-    +----------------+---------------------------+
-
-REQUEST : {"operacao": "VENDER_PECA", "argumentos": {"codigo": 2, "quantidade": 1}}
-REPLY OK: {"status": "OK",   "resultado": {...}}
-REPLY ERR: {"status": "ERRO", "mensagem": "Estoque insuficiente ..."}
+Formato externo escolhido: JSON em UTF-8
 """
 
 import json
@@ -54,10 +42,6 @@ def _receber_exato(sock, n):
 
 
 def receber(sock):
-    """
-    Recebe uma mensagem completa e a desempacota.
-    Devolve None se a conexão foi encerrada pelo outro lado.
-    """
     cabecalho = _receber_exato(sock, 4)
     if cabecalho is None:
         return None

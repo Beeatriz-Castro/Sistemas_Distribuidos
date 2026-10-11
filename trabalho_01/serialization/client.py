@@ -6,9 +6,6 @@ Para cada operação o cliente:
   2. recebe os bytes do reply e DESEMPACOTA (bytes -> dict)
   3. reconstrói os objetos (PecaDeRoupa / Venda) a partir do resultado
 
-Executar:
-  python3 -m serialization.client            (menu interativo)
-  python3 -m serialization.client --demo     (demonstração automática)
 """
 
 import argparse
@@ -41,24 +38,24 @@ class ClienteLoja(ClienteTCP):
 
 
 def demonstracao(cliente):
-    print("\n=== 1) Listando as peças da loja ===")
+    print("\n 1) Listando as peças da loja ")
     for peca in cliente.listar_pecas():
         print("  ", peca)
 
-    print("\n=== 2) Enviando um OBJETO Camiseta serializado para o servidor ===")
-    nova = Camiseta(6, "Camiseta Polo", "Lacoste", "G", "verde", 189.90, 8, "curta")
+    print("\n 2) Enviando um OBJETO Camiseta serializado para o servidor ")
+    nova = Camiseta(7, "Camiseta Polo", "Lacoste", "G", "verde", 189.90, 8, "curta")
     print("   Adicionada:", cliente.adicionar_peca(nova))
 
-    print("\n=== 3) Vendendo 2 unidades da peça 6 ===")
+    print("\n 3) Vendendo 2 unidades da peça 6 ")
     print("  ", cliente.vender_peca(6, 2))
 
-    print("\n=== 4) Tentando vender mais do que existe em estoque (erro esperado) ===")
+    print("\n 4) Tentando vender mais do que existe em estoque (erro esperado) ")
     try:
         cliente.vender_peca(4, 99)
     except ErroRemoto as erro:
         print("   Erro recebido do servidor:", erro)
 
-    print("\n=== 5) Total vendido ===")
+    print("\n 5) Total vendido ")
     print("  ", cliente.total_vendas())
 
 

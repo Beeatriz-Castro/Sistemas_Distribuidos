@@ -29,7 +29,7 @@ def imprimir(texto):
 
 
 def titulo(texto):
-    imprimir(f"\n=== {texto} ===")
+    imprimir(f"\n {texto} ")
 
 
 def esperar_erro(descricao, funcao, *args):

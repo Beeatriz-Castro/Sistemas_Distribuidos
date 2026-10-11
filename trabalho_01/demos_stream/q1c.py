@@ -1,7 +1,6 @@
 """
 Q1-c: destino = arquivo (FileOutputStream).
 
-    python3 -m demos_stream.q1c
 Gera o arquivo dados/pecas.bin (use depois em q2c e q2b).
 """
 

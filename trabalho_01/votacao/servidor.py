@@ -97,7 +97,7 @@ class ServidorVotacao(ServidorTCP):
     def _encerrar_votacao(self):
         resultado = self.urna.encerrar()
         self.encerrada.set()
-        self._log("\n>>> Prazo encerrado: a urna não aceita mais votos.")
+        self._log("\n> Prazo encerrado: a urna não aceita mais votos.")
         self._log(formatar_resultado(resultado))
 
     # ---------- sessões ----------

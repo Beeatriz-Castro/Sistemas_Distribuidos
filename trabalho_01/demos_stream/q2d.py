@@ -1,8 +1,6 @@
 """
 Q2-d: origem = cliente remoto (TCP).  Este programa é o SERVIDOR que recebe.
-(Também serve como o "servidor remoto" da Q1-d.)
-
-    python3 -m demos_stream.q2d [porta]      (Ctrl+C para parar)
+    python3 -m demos_stream.q2d [porta]     
 """
 
 import socket
@@ -32,7 +30,7 @@ def main():
         servidor.listen()
         print(f"Servidor aguardando na porta {PORTA}...")
         while True:
-            conexao, endereco = servidor.accept()  # bloqueia até um cliente chegar
+            conexao, endereco = servidor.accept()  
             try:
                 atender(conexao, endereco)
             except (EOFError, ConnectionError) as erro:

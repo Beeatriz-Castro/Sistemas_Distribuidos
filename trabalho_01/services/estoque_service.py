@@ -1,7 +1,6 @@
 from services.erros import LojaError
 
 class EstoqueService:
-    """Operações sobre as peças em estoque da loja."""
 
     def __init__(self, loja):
         self.loja = loja

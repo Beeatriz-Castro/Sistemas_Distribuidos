@@ -33,7 +33,7 @@ def imprimir(texto):
 
 
 def titulo(texto):
-    imprimir(f"\n=== {texto} ===")
+    imprimir(f"\n {texto} ")
 
 
 def executar(grupo="230.0.0.1", porta_multicast=5007, verboso=True):

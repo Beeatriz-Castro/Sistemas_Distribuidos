@@ -1,7 +1,7 @@
 """
 Q2-c: origem = arquivo (FileInputStream).
 
-    python -m demos_streams.q2c_arquivo        (rode antes q1c_arquivo)
+    python -m demos_stream.q2c_arquivo   
 """
 
 import os
@@ -13,7 +13,7 @@ ARQUIVO = os.path.join("dados", "pecas.bin")
 
 def main():
     if not os.path.exists(ARQUIVO):
-        print(f"Arquivo {ARQUIVO} não existe. Rode antes: python -m demos_streams.q1c_arquivo")
+        print(f"Arquivo {ARQUIVO} não existe. Rode antes: python -m demos_stream.q1c_arquivo")
         return
 
     with open(ARQUIVO, "rb") as arquivo:                

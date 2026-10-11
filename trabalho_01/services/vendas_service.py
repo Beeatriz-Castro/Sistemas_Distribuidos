@@ -4,8 +4,6 @@ from services.erros import LojaError
 from services.vendas import Vendas
 
 class VendasService(Vendas):
-    """Implementa a interface Vendas: registra vendas e calcula totais."""
-
     def __init__(self, estoque_service):
         self.estoque = estoque_service
         self._vendas = []

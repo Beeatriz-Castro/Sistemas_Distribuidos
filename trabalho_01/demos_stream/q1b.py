@@ -1,9 +1,5 @@
 """
 Q1-b: destino = saída padrão (System.out).
-
-    python3 -m demos_stream.q1b                 -> mostra os bytes em hexadecimal
-    python3 -m demos_stream.q1b | python3 -m demos_stream.q2b
-                                                       -> envia bytes REAIS para a entrada padrão do outro programa
 """
 
 import sys
@@ -13,7 +9,7 @@ from streams.loja_output_stream import LojaOutputStream
 
 
 class DestinoHexa:
-    """Destino auxiliar: imprime os bytes em hexadecimal (só para ler no terminal)."""
+    """imprime os bytes em hexadecimal (só para ler no terminal)."""
 
     def write(self, dados):
         sys.stdout.write(dados.hex(" ") + "\n")

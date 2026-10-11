@@ -24,7 +24,7 @@ class ClienteTCP:
         self.verboso = verboso
         self._socket = socket.create_connection((host, porta), timeout=timeout)
         self._socket.settimeout(None)
-        self._trava = threading.Lock()  # um request por vez nesta conexão
+        self._trava = threading.Lock()  
 
     def fechar(self):
         try:
@@ -43,9 +43,9 @@ class ClienteTCP:
         if self.verboso:
             corpo = empacotar(requisicao)
             exibicao = requisicao
-            if "senha" in requisicao["argumentos"]:  # não mostra a senha na tela
+            if "senha" in requisicao["argumentos"]:
                 exibicao = {**requisicao, "argumentos": {**requisicao["argumentos"], "senha": "***"}}
-            print(f"  >> Empacotado ({len(corpo)} bytes): {empacotar(exibicao).decode('utf-8')}")
+            print(f"   Empacotado ({len(corpo)} bytes): {empacotar(exibicao).decode('utf-8')}")
 
         with self._trava:
             enviar(self._socket, requisicao)
@@ -54,7 +54,7 @@ class ClienteTCP:
             raise ConnectionError("O servidor encerrou a conexão")
 
         if self.verboso:
-            print(f"  << Desempacotado: {resposta}")
+            print(f"   Desempacotado: {resposta}")
         if resposta.get("status") != "OK":
             raise ErroRemoto(resposta.get("mensagem", "erro desconhecido"))
         return resposta.get("resultado")

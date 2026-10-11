@@ -6,7 +6,6 @@ Fluxo de cada requisição:
   2. processar()    -> usa EstoqueService / VendasService (reconstrói objetos)
   3. enviar()       -> EMPACOTA o reply (dict -> bytes) e envia ao cliente
 
-Executar:  python3 -m serialization.server [--host H] [--porta P]
 """
 
 import argparse
@@ -26,9 +25,8 @@ class ServidorLoja(ServidorTCP):
         super().__init__(host, porta, verboso)
         self.estoque = EstoqueService(loja)
         self.vendas = VendasService(self.estoque)
-        self._trava = threading.Lock()  # um cliente por vez mexe nos dados
+        self._trava = threading.Lock() 
 
-    # ---------- lógica da aplicação ----------
     def executar(self, operacao, args, endereco=None):
         with self._trava:
             return self._executar(operacao, args)
@@ -38,7 +36,7 @@ class ServidorLoja(ServidorTCP):
             return [peca.para_dict() for peca in self.estoque.listar_pecas()]
 
         if operacao == "ADICIONAR_PECA":
-            peca = peca_de_dict(args["peca"])          # dict -> objeto da subclasse certa
+            peca = peca_de_dict(args["peca"])         
             self.estoque.adicionar_peca(peca)
             return peca.para_dict()
 

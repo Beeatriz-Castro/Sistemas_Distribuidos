@@ -92,7 +92,7 @@ class ServidorNotificacoes(ServidorTCP):
         with self._trava_sessoes:
             return sorted(self._sessoes.values())
 
-    # =============== UDP: publicação multicast ===============
+    #  UDP: publicação multicast 
     def publicar(self, tipo, texto):
         """Monta, empacota e envia UMA mensagem ao grupo. Pode ser chamado por várias threads."""
         with self._trava_seq:
@@ -118,7 +118,7 @@ class ServidorNotificacoes(ServidorTCP):
         wait(futuros)
         return [f.result() for f in futuros]
 
-    # =============== simulação da loja (produz ATUALIZACAO / ALERTA) ===============
+    #  simulação da loja (produz ATUALIZACAO / ALERTA) 
     def iniciar_simulacao_loja(self, intervalo=4.0, loja=None):
         estoque = EstoqueService(loja or criar_loja_exemplo())
         vendas = VendasService(estoque)
@@ -149,7 +149,7 @@ class ServidorNotificacoes(ServidorTCP):
         thread.start()
         return thread
 
-    # =============== console do administrador ===============
+    #  console do administrador 
     def console(self, entrada=input):
         atalhos = {"n": mensagens.NOTIFICACAO, "a": mensagens.ALERTA, "u": mensagens.ATUALIZACAO}
         print(AJUDA_CONSOLE)

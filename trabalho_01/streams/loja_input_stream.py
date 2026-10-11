@@ -1,7 +1,4 @@
 """
-Em Java seria:  class LojaInputStream extends InputStream
-Em Python:      class LojaInputStream(io.RawIOBase)   (stream binário de entrada)
-
 Lê os bytes gerados pelo LojaOutputStream (mesmo formato descrito lá) e
 reconstrói a lista de objetos PecaDeRoupa (desempacotamento / unmarshalling).
 """
@@ -15,7 +12,6 @@ from models.peca_de_roupa import criar_peca
 class LojaInputStream(io.RawIOBase):
 
     def __init__(self, origem):
-        """origem: de onde os bytes serão lidos (qualquer objeto com read(n))."""
         super().__init__()
         self.origem = origem
 
@@ -34,10 +30,6 @@ class LojaInputStream(io.RawIOBase):
         return [self._ler_peca() for _ in range(quantidade)]
 
     def _ler_exato(self, n):
-        """
-        Lê EXATAMENTE n bytes. Em redes (TCP) uma leitura pode devolver menos
-        bytes do que o pedido, então repetimos até completar.
-        """
         partes = []
         faltam = n
         while faltam > 0:

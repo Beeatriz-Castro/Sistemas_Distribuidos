@@ -6,9 +6,6 @@ Cada cliente é atendido em uma thread própria. Para cada mensagem:
   2. executar()  -> lógica da aplicação (implementada pela subclasse)
   3. enviar()    -> EMPACOTA o reply (dict -> bytes) e envia ao cliente
 
-Formato do request : {"operacao": "NOME", "argumentos": {...}}
-Formato do reply   : {"status": "OK", "resultado": ...}
-                     {"status": "ERRO", "mensagem": "..."}
 """
 
 import socket
@@ -27,7 +24,7 @@ class ServidorTCP:
         self._socket.bind((host, porta))
         self._socket.listen()
         self.host = host
-        self.porta = self._socket.getsockname()[1]  # útil quando porta=0 (testes)
+        self.porta = self._socket.getsockname()[1] 
         self._ativo = True
 
     def _log(self, *args):
@@ -68,7 +65,7 @@ class ServidorTCP:
                     self._log(f"    REQUEST  de {endereco}: {self._para_log(requisicao)}")
                     resposta = self.processar(requisicao, endereco)
                     self._log(f"    REPLY    para {endereco}: {resposta}")
-                    enviar(conexao, resposta)              # empacota o reply
+                    enviar(conexao, resposta)              
             except (ConnectionError, ValueError, OSError) as erro:
                 self._log(f"    Conexão com {endereco} encerrada com erro: {erro}")
         self._log(f"[-] Cliente desconectado: {endereco}")
@@ -76,7 +73,6 @@ class ServidorTCP:
 
     @staticmethod
     def _para_log(requisicao):
-        """Esconde senhas antes de imprimir no console."""
         argumentos = requisicao.get("argumentos")
         if isinstance(argumentos, dict) and "senha" in argumentos:
             argumentos = {**argumentos, "senha": "***"}
@@ -84,7 +80,6 @@ class ServidorTCP:
         return requisicao
 
     def processar(self, requisicao, endereco=None):
-        """Recebe o request já desempacotado e devolve o reply (ainda como dict)."""
         try:
             operacao = requisicao["operacao"]
             argumentos = requisicao.get("argumentos") or {}

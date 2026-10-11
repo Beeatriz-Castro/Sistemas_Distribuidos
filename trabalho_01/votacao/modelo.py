@@ -165,7 +165,7 @@ class Urna:
 
 def formatar_resultado(resultado):
     titulo = "RESULTADO PARCIAL" if resultado["parcial"] else "RESULTADO FINAL"
-    linhas = [f"===== {titulo} — {resultado['total_votos']} voto(s) ====="]
+    linhas = [f"== {titulo} — {resultado['total_votos']} voto(s) =="]
     for linha in resultado["apuracao"]:
         linhas.append(f"  {linha['numero']:>3} {linha['nome']:<22} {linha['votos']:>4} voto(s)  "
                       f"{linha['percentual']:6.2f}%")
