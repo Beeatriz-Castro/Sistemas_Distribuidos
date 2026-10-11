@@ -1,4 +1,3 @@
-
 class Venda:
     def __init__(self, codigo, codigo_peca, nome_peca, quantidade, valor_total, data_hora):
         self.codigo = int(codigo)             

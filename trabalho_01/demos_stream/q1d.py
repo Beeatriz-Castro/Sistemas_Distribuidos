@@ -1,8 +1,8 @@
 """
 Q1-d: destino = servidor remoto (TCP).  Este programa é o CLIENTE que envia.
 
-1) Em um terminal:  python -m demos_streams.q2d_servidor_tcp
-2) Em outro:        python -m demos_streams.q1d_cliente_tcp [host] [porta]
+1) Em um terminal:  python3 -m demos_stream.q2d
+2) Em outro:        python3 -m demos_stream.q1d [host] [porta]
 """
 
 import socket
