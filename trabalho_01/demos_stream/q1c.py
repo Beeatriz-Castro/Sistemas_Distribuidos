@@ -1,8 +1,8 @@
 """
 Q1-c: destino = arquivo (FileOutputStream).
 
-    python -m demos_streams.q1c_arquivo
-Gera o arquivo dados/pecas.bin (use depois em q2c_arquivo e q2b_stdin).
+    python3 -m demos_stream.q1c
+Gera o arquivo dados/pecas.bin (use depois em q2c e q2b).
 """
 
 import os

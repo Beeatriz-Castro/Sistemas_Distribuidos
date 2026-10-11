@@ -10,7 +10,7 @@ from multicast.servidor import ServidorNotificacoes
 from serialization.cliente_base import ErroRemoto
 
 GRUPO = "230.0.0.1"
-PORTA_MC = 5107
+PORTA_MC = 5107  # diferente da padrão para não interferir em uma demonstração aberta
 
 
 def esperar(condicao, limite=3.0):
@@ -98,4 +98,4 @@ class TesteMulticast(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()

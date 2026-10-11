@@ -1,10 +1,13 @@
+from services.erros import LojaError
 
 class EstoqueService:
+    """Operações sobre as peças em estoque da loja."""
+
     def __init__(self, loja):
         self.loja = loja
 
     def listar_pecas(self):
-        return list(self.loja.pecas) 
+        return list(self.loja.pecas)
 
     def buscar_peca(self, codigo):
         for peca in self.loja.pecas:
@@ -14,15 +17,15 @@ class EstoqueService:
 
     def adicionar_peca(self, peca):
         if peca.preco < 0 or peca.quantidade < 0:
-            raise ValueError("Preço e quantidade não podem ser negativos")
+            raise LojaError("Preço e quantidade não podem ser negativos")
         if self.buscar_peca(peca.codigo) is not None:
-            raise ValueError(f"Já existe uma peça com o código {peca.codigo}")
+            raise LojaError(f"Já existe uma peça com o código {peca.codigo}")
         self.loja.pecas.append(peca)
         return peca
 
     def remover_peca(self, codigo):
         peca = self.buscar_peca(codigo)
         if peca is None:
-            raise ValueError(f"Peça {codigo} não encontrada")
+            raise LojaError(f"Peça {codigo} não encontrada")
         self.loja.pecas.remove(peca)
         return peca

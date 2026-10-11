@@ -1,10 +1,11 @@
 from datetime import datetime
-
 from models.venda import Venda
+from services.erros import LojaError
 from services.vendas import Vendas
 
-# IMPLEMENTA A INTERFACE
 class VendasService(Vendas):
+    """Implementa a interface Vendas: registra vendas e calcula totais."""
+
     def __init__(self, estoque_service):
         self.estoque = estoque_service
         self._vendas = []
@@ -12,13 +13,13 @@ class VendasService(Vendas):
 
     def vender(self, codigo_peca, quantidade):
         if quantidade <= 0:
-            raise ValueError("A quantidade deve ser maior que zero")
+            raise LojaError("A quantidade deve ser maior que zero")
 
         peca = self.estoque.buscar_peca(codigo_peca)
         if peca is None:
-            raise ValueError(f"Peça {codigo_peca} não encontrada")
+            raise LojaError(f"Peça {codigo_peca} não encontrada")
         if peca.quantidade < quantidade:
-            raise ValueError(f"Estoque insuficiente de '{peca.nome}' "
+            raise LojaError(f"Estoque insuficiente de '{peca.nome}' "
                              f"(disponível: {peca.quantidade})")
 
         peca.quantidade -= quantidade  

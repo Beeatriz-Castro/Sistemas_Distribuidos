@@ -7,69 +7,37 @@ Para cada operação o cliente:
   3. reconstrói os objetos (PecaDeRoupa / Venda) a partir do resultado
 
 Executar:
-  python -m questao3_serializacao.cliente            (menu interativo)
-  python -m questao3_serializacao.cliente --demo     (demonstração automática)
+  python3 -m serialization.client            (menu interativo)
+  python3 -m serialization.client --demo     (demonstração automática)
 """
 
 import argparse
-import socket
 
 from models.peca_de_roupa import TIPOS_DE_PECA, Camiseta, criar_peca, peca_de_dict
 from models.venda import Venda
-from serialization.protocolo import desempacotar, empacotar, enviar, receber
+from serialization.cliente_base import ClienteTCP, ErroRemoto
 
 
-class ErroRemoto(Exception):
-    """O servidor respondeu com status erro."""
-
-
-class ClienteLoja:
+class ClienteLoja(ClienteTCP):
+    """Stub do lado cliente: cada método vira um request/reply com o servidor."""
 
     def __init__(self, host, porta, verboso=True):
-        self.verboso = verboso
-        self._socket = socket.create_connection((host, porta))
-
-    def fechar(self):
-        self._socket.close()
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *args):
-        self.fechar()
-
-    def _chamar(self, operacao, argumentos=None):
-        requisicao = {"operacao": operacao, "argumentos": argumentos or {}}
-        if self.verboso:
-            print(f"  >> Empacotado ({len(empacotar(requisicao))} bytes): "
-                  f"{empacotar(requisicao).decode('utf-8')}")
-
-        enviar(self._socket, requisicao)       
-        resposta = receber(self._socket)      
-        if resposta is None:
-            raise ConnectionError("O servidor encerrou a conexão")
-
-        if self.verboso:
-            print(f" Desempacotado: {resposta}")
-        if resposta["status"] != "OK":
-            raise ErroRemoto(resposta["mensagem"])
-        return resposta["resultado"]
-
+        super().__init__(host, porta, verboso)
 
     def listar_pecas(self):
-        resultado = self._chamar("LISTAR_PECAS")
+        resultado = self.chamar("LISTAR_PECAS")
         return [peca_de_dict(item) for item in resultado]
 
     def adicionar_peca(self, peca):
-        resultado = self._chamar("ADICIONAR_PECA", {"peca": peca.para_dict()})
+        resultado = self.chamar("ADICIONAR_PECA", {"peca": peca.para_dict()})
         return peca_de_dict(resultado)
 
     def vender_peca(self, codigo, quantidade):
-        resultado = self._chamar("VENDER_PECA", {"codigo": codigo, "quantidade": quantidade})
+        resultado = self.chamar("VENDER_PECA", {"codigo": codigo, "quantidade": quantidade})
         return Venda.de_dict(resultado)
 
     def total_vendas(self):
-        return self._chamar("TOTAL_VENDAS")
+        return self.chamar("TOTAL_VENDAS")
 
 
 def demonstracao(cliente):
@@ -134,6 +102,9 @@ def menu(cliente):
             print("Erro do servidor:", erro)
         except (ValueError, IndexError):
             print("Entrada inválida.")
+        except (ConnectionError, OSError) as erro:
+            print("Conexão perdida:", erro)
+            break
 
 
 def main():

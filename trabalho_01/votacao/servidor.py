@@ -93,12 +93,14 @@ class ServidorVotacao(ServidorTCP):
         self._timer.daemon = True
         self._timer.start()
 
+    # ---------- prazo ----------
     def _encerrar_votacao(self):
         resultado = self.urna.encerrar()
         self.encerrada.set()
         self._log("\n>>> Prazo encerrado: a urna não aceita mais votos.")
         self._log(formatar_resultado(resultado))
 
+    # ---------- sessões ----------
     def _sessao(self, args, papel_exigido=None):
         with self._trava_sessoes:
             sessao = self._sessoes.get(args.get("token"))
@@ -118,6 +120,7 @@ class ServidorVotacao(ServidorTCP):
             estado["ja_votou"] = self.urna.ja_votou(usuario)
         return estado
 
+    # ---------- despacho das operações ----------
     def executar(self, operacao, args, endereco=None):
         if operacao == "LOGIN":
             return self._login(str(args["usuario"]), str(args["senha"]))
@@ -179,6 +182,7 @@ class ServidorVotacao(ServidorTCP):
                 "multicast": {"grupo": self.grupo, "porta": self.porta_multicast},
                 **self._estado(usuario, papel)}
 
+    # ---------- multicast: notas informativas ----------
     def enviar_nota(self, autor, texto):
         if not texto.strip():
             raise ValueError("A nota não pode ser vazia")

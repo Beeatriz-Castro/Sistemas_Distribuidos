@@ -2,14 +2,14 @@
 
 ## 1. Objetivo do projeto
 
-O serviço remoto escolhido é um sistema simples de gestão de uma loja de roupas. O projeto demonstra dois modos diferentes de transportar dados:
+O serviço remoto escolhido é um sistema simples de gestão de uma loja de roupas. O projeto demonstra os mecanismos de comunicação entre processos do Capítulo 4:
 
 - **Itens 1 e 2 — Streams:** escrever e ler uma sequência binária de peças usando destinos/origens diferentes: saída/entrada padrão, arquivo e TCP.
 - **Item 3 — Serialização:** um cliente envia pedidos de operações para um servidor TCP. As mensagens são codificadas em JSON, processadas pelo servidor e respondidas ao cliente.
+- **Item 4 — Multicast:** clientes se autenticam por TCP e passam a receber, por UDP multicast (grupo `230.0.0.1`), notificações, alertas e atualizações de estoque da loja em tempo real.
+- **Questão extra — Votação:** sistema de votação distribuído com prazo, eleitores e administradores; login, candidatos e votos por TCP, notas informativas por multicast.
 
-Esses dois caminhos são relacionados, mas não são o mesmo protocolo. Por isso existem a pasta `demos_stream/` e a pasta `serialization/`.
-
-> **Fora do escopo deste repositório:** o item 4 (multicast) e a questão extra de votação descritos no enunciado.
+Cada item tem sua pasta (`demos_stream/`, `serialization/`, `multicast/`, `votacao/`) porque usa um protocolo próprio. Há também uma suíte de testes automatizados em `tests/`.
 
 ## 2. Preparação
 
@@ -33,7 +33,7 @@ trabalho_01/
 │   ├── venda.py               # objeto que representa uma venda
 │   └── exemplo.py             # dados de exemplo
 ├── services/
-│   ├── erros.py               # erros de negócio
+│   ├── erros.py               # LojaError: erros de negócio
 │   ├── estoque_service.py     # operações de estoque
 │   ├── vendas.py              # interface/abstração de vendas
 │   └── vendas_service.py      # operações de venda
@@ -41,23 +41,33 @@ trabalho_01/
 │   ├── loja_output_stream.py  # escrita do formato binário (item 1)
 │   └── loja_input_stream.py   # leitura do formato binário (item 2)
 ├── demos_stream/
-│   ├── q1b.py                 # item 1-b: saída padrão
-│   ├── q1c.py                 # item 1-c: arquivo
-│   ├── q1d.py                 # item 1-d: cliente que envia por TCP
-│   ├── q2b.py                 # item 2-b: entrada padrão
-│   ├── q2c.py                 # item 2-c: leitura de arquivo
-│   └── q2d.py                 # item 2-d: servidor que recebe por TCP
-└── serialization/
-    ├── protocolo.py           # JSON, enquadramento e envio/recebimento
-    ├── client.py              # cliente da questão 3
-    └── server.py              # servidor da questão 3
+│   ├── q1b.py / q1c.py / q1d.py   # item 1: saída padrão, arquivo, TCP
+│   └── q2b.py / q2c.py / q2d.py   # item 2: entrada padrão, arquivo, TCP
+├── serialization/
+│   ├── protocolo.py           # JSON, enquadramento e envio/recebimento
+│   ├── servidor_base.py       # servidor request/reply multithread (itens 3, 4 e extra)
+│   ├── cliente_base.py        # cliente request/reply (itens 3, 4 e extra)
+│   ├── client.py              # cliente da questão 3
+│   └── server.py              # servidor da questão 3
+├── multicast/                 # item 4
+│   ├── grupo.py               # joinGroup / leaveGroup / sockets multicast
+│   ├── mensagens.py           # formato JSON: tipo, mensagem, timestamp, seq
+│   ├── servidor.py            # autenticação TCP + envio multicast concorrente
+│   ├── cliente.py             # thread de escuta + thread de interação
+│   └── demo.py                # demonstração automática com 3 clientes
+├── votacao/                   # questão extra
+│   ├── modelo.py              # Candidato, Urna (prazo, votos, apuração)
+│   ├── servidor.py            # servidor TCP multithread + notas por multicast
+│   ├── cliente.py             # cliente eleitor/administrador
+│   └── demo.py                # demonstração automática
+└── tests/                     # testes automatizados (unittest)
 ```
 
 ## 4. Conceitos fundamentais do Capítulo 4
 
 ### 4.1 Processos, mensagens e comunicação
 
-Um **processo** é um programa em execução. Neste projeto, o cliente e o servidor são processos diferentes. Eles precisam combinar como estabelecer a comunicação e como interpretar os bytes que trocam.
+Um **processo** é um programa em execução. Neste projeto, os clientes e os servidores são processos diferentes. Eles precisam combinar como estabelecer a comunicação e como interpretar os bytes que trocam.
 
 O capítulo apresenta duas operações básicas: **send** (enviar) e **receive** (receber). Em Python, neste projeto, funções como `sendall()` e `recv()` executam parte desse papel.
 
@@ -327,7 +337,136 @@ O servidor de serialização usa a porta `5050` por padrão; o servidor das demo
 
 O servidor de serialização atende clientes em threads separadas. Uma trava (`threading.Lock`) protege operações que modificam o estoque, evitando que duas requisições concorrentes alterem esse estado ao mesmo tempo.
 
-## 8. Problemas comuns
+O laço "aceitar conexão → uma thread por cliente → receber request → executar → enviar reply" está em `serialization/servidor_base.py` (classe `ServidorTCP`), e o lado cliente em `serialization/cliente_base.py` (classe `ClienteTCP`). Os servidores dos itens 3, 4 e da questão extra herdam dessas classes e implementam apenas as suas operações.
+
+## 8. Item 4 — Multicast
+
+### 8.1 Arquitetura
+
+```text
+                 (1) AUTENTICAR usuario/senha  ── TCP unicast, porta 5060 ──►
+  Cliente  ◄── (2) token + grupo 230.0.0.1 + porta 5007 ──────────────────────  Servidor
+     │
+     │ (3) joinGroup(230.0.0.1)
+     ▼
+  ◄════ (4) NOTIFICACAO / ALERTA / ATUALIZACAO ══ UDP multicast 230.0.0.1:5007 ═══ Servidor
+```
+
+- O **TCP** (unicast) é usado só para a autenticação: o servidor confere usuário e senha e só então informa o grupo e a porta multicast. A troca usa o mesmo protocolo request/reply do item 3.
+- O **UDP multicast** entrega cada datagrama, de uma vez, a todos os processos que entraram no grupo. O endereço `230.0.0.1` é de classe D (224.0.0.0 a 239.255.255.255) e a porta `5007` é fixa. O TTL padrão é 1, ou seja, os datagramas não saem da rede local.
+- **joinGroup / leaveGroup:** em Python são as opções de socket `IP_ADD_MEMBERSHIP` e `IP_DROP_MEMBERSHIP` (`multicast/grupo.py`). Depois de `leaveGroup`, o cliente deixa de receber as mensagens, mesmo que outros clientes da mesma máquina continuem no grupo.
+
+### 8.2 Formato das mensagens (JSON, um datagrama por mensagem)
+
+```json
+{
+  "tipo": "ALERTA",
+  "mensagem": "Estoque baixo de 'Jaqueta de Couro': 2 unidade(s)",
+  "timestamp": 1791744000,
+  "seq": 7
+}
+```
+
+`tipo` é `NOTIFICACAO`, `ALERTA` ou `ATUALIZACAO`. O campo `seq` foi acrescentado ao formato sugerido para mostrar a ordem de envio. Como o envio é concorrente, os números podem chegar fora de ordem, e o UDP não garante entrega. Diferentemente do TCP, não é preciso cabeçalho de tamanho: cada `recvfrom()` devolve exatamente um datagrama.
+
+### 8.3 Threads
+
+| Lado | Thread | Função |
+|---|---|---|
+| Servidor | `accept` + uma por conexão | autenticação TCP |
+| Servidor | `simulacao-loja` | simula vendas e reposições usando `EstoqueService`/`VendasService` e publica `ATUALIZACAO` e `ALERTA` (estoque baixo/esgotado) |
+| Servidor | pool `envio_0..3` | publicações assíncronas (`publicar_async`) e rajadas concorrentes (`rajada N`) |
+| Servidor | principal | console do administrador: publica mensagens digitadas |
+| Cliente | `escuta-multicast` | bloqueia em `recvfrom()` e exibe cada mensagem assim que chega |
+| Cliente | `interacao-usuario` | lê comandos: `sair` (leaveGroup), `entrar` (joinGroup), `historico`, `status`, `fim` |
+
+Várias threads do servidor chamam `publicar()` ao mesmo tempo; o contador de sequência é protegido por uma trava.
+
+### 8.4 Como testar
+
+**Demonstração automática** (servidor + 3 clientes simultâneos, leave/join e rajada concorrente):
+
+```bash
+python3 -m multicast.demo
+```
+
+**Manual, em vários terminais:**
+
+```bash
+# Terminal 1 — servidor (console do administrador + simulação da loja a cada 5 s)
+python3 -m multicast.servidor
+
+# Terminais 2, 3, 4... — um cliente por terminal
+python3 -m multicast.cliente --usuario ana --senha 123
+python3 -m multicast.cliente --usuario bruno --senha 123
+python3 -m multicast.cliente --usuario carla --senha 123 --auto 60   # só escuta por 60 s
+```
+
+Usuários: `ana`, `bruno`, `carla`, `davi` (senha `123`) e `admin` (senha `admin`).
+
+No console do servidor: `n <texto>` (NOTIFICACAO), `a <texto>` (ALERTA), `u <texto>` (ATUALIZACAO), `rajada 10` (10 mensagens concorrentes), `clientes`, `sair`. Para desligar a simulação automática, use `--intervalo 0`.
+
+**Em máquinas diferentes da mesma rede:** rode o cliente com `--host IP_DO_SERVIDOR`. Se a máquina tiver várias interfaces, informe a interface com `--interface IP_LOCAL` no cliente e no servidor.
+
+## 9. Questão extra — Sistema de votação
+
+### 9.1 Funcionamento
+
+- O servidor (`votacao/servidor.py`) abre a votação com um **prazo** (`--duracao`, em segundos). Um `threading.Timer` encerra a urna no fim do prazo; depois disso o servidor recusa votos e alterações de candidatos e calcula **total de votos, percentuais e vencedor** (ou empate).
+- O **eleitor** faz login e recebe, na resposta, a lista de candidatos, o tempo restante e o grupo multicast. Cada eleitor vota uma única vez. O resultado só fica disponível para ele depois do prazo.
+- O **administrador** adiciona e remove candidatos, envia **notas informativas** e pode consultar a apuração parcial. Se um candidato é removido, os votos dele são anulados e esses eleitores podem votar de novo.
+- **Comunicação:** login, lista de candidatos, votos e demais operações vão por **TCP unicast** (porta `6000`), com servidor **multithread** (uma thread por cliente) e uma trava na urna. O **UDP multicast** (`230.0.0.2:6001`) é usado **exclusivamente** para as notas dos administradores.
+- **Representação externa de dados:** JSON com cabeçalho de tamanho (o mesmo `protocolo.py` do item 3). O enunciado sugere protocol buffers, mas aceita JSON. Com JSON o projeto continua usando só a biblioteca padrão.
+
+| Operação | Quem | Argumentos |
+|---|---|---|
+| `LOGIN` | todos | `usuario`, `senha` |
+| `LISTAR_CANDIDATOS`, `STATUS`, `LOGOUT` | todos | `token` |
+| `VOTAR` | eleitor | `token`, `numero` |
+| `RESULTADO` | eleitor (após o prazo) / admin (parcial a qualquer momento) | `token` |
+| `ADICIONAR_CANDIDATO` | admin | `token`, `nome`, `partido`, `numero` (opcional) |
+| `REMOVER_CANDIDATO` | admin | `token`, `numero` |
+| `ENVIAR_NOTA` | admin | `token`, `texto` → enviada por multicast |
+
+Cada cliente tem uma thread `escuta-notas` (multicast) e uma thread `interacao-usuario` (menu).
+
+### 9.2 Como testar
+
+**Demonstração automática** (prazo de 4 s, 5 eleitores votando em paralelo, erros esperados e resultado final):
+
+```bash
+python3 -m votacao.demo
+```
+
+**Manual:**
+
+```bash
+# Terminal 1 — servidor com 2 minutos de votação
+python3 -m votacao.servidor --duracao 120
+
+# Terminal 2 — administrador
+python3 -m votacao.cliente --usuario admin --senha admin
+
+# Terminais 3, 4... — eleitores (eleitor1 até eleitor10, senha 123)
+python3 -m votacao.cliente --usuario eleitor1 --senha 123
+```
+
+Use `--verboso` no cliente para ver as mensagens empacotadas e desempacotadas.
+
+## 10. Testes automatizados
+
+```bash
+python3 -m unittest discover -s tests -t . -v
+```
+
+| Arquivo | O que verifica |
+|---|---|
+| `tests/test_streams.py` | ida e volta do formato binário, envio parcial (`quantidade`), quantidade inválida, fluxo truncado, TCP e pipe `q1b \| q2b` |
+| `tests/test_serializacao.py` | empacotamento JSON, mensagem TCP fragmentada, fluxo cliente-servidor, erros de negócio, vendas concorrentes sem vender além do estoque |
+| `tests/test_multicast.py` | formato das mensagens, endereço classe D, autenticação recusada, 3 clientes recebendo ao mesmo tempo, leaveGroup/joinGroup, rajada concorrente |
+| `tests/test_votacao.py` | apuração (percentuais, vencedor, empate, sem votos), voto duplicado, prazo, remoção de candidato, fluxo completo via rede com nota multicast |
+
+## 11. Problemas comuns
 
 | Sintoma | Possível causa e solução |
 |---|---|
@@ -339,31 +478,33 @@ O servidor de serialização atende clientes em threads separadas. Uma trava (`t
 | `q2b` parece ficar parado | Está aguardando bytes na entrada padrão; use o pipe ou o redirecionamento de arquivo. |
 | `dados/pecas.bin` não existe | Execute primeiro `python3 -m demos_stream.q1c`. |
 | A demonstração de serialização acusa código duplicado | O servidor mantém o estado em memória durante sua execução. Reinicie o servidor para voltar aos dados iniciais. |
+| Cliente multicast autentica mas não recebe nada | Firewall bloqueando UDP, rede sem suporte a multicast (algumas redes Wi-Fi) ou interface errada: tente `--interface IP_LOCAL` no cliente e no servidor. Na mesma máquina, tudo funciona pela interface local. |
+| Votação recusa votos logo no início | O prazo (`--duracao`) já terminou; reinicie o servidor com um prazo maior. |
 
-## 9. Roteiro de demonstração
+## 12. Roteiro de demonstração
 
-1. Mostre `models/peca_de_roupa.py` e `models/venda.py`: os objetos de domínio.
+1. Mostre `models/peca_de_roupa.py` e `models/venda.py` (objetos de domínio) e `services/` (regras de negócio).
 2. Mostre `streams/loja_output_stream.py` e `streams/loja_input_stream.py`: como os bytes são escritos e lidos.
-3. Execute `q1b | q2b`: demonstração de saída padrão ligada à entrada padrão.
-4. Execute `q1c` e `q2c`: demonstração com arquivo.
-5. Execute `q2d` e `q1d` em dois terminais: demonstração dos streams por TCP.
-6. Execute `serialization.server` e `serialization.client --demo`: mostre request, reply, JSON e reconstrução de objetos.
-7. Explique que são protocolos separados e que o servidor correto precisa corresponder ao cliente usado.
+3. Execute `q1b | q2b`, depois `q1c` e `q2c`, depois `q2d` e `q1d` em dois terminais.
+4. Execute `serialization.server` e `serialization.client --demo`: mostre request, reply, JSON e reconstrução de objetos.
+5. Execute `multicast.servidor` e três `multicast.cliente`; envie mensagens pelo console, faça `sair`/`entrar` em um cliente e uma `rajada 10`.
+6. Execute `votacao.servidor --duracao 90`, um admin e dois eleitores: adicione um candidato, envie uma nota, vote, tente votar duas vezes e mostre o resultado após o prazo.
+7. Rode `python3 -m unittest discover -s tests -t .` para mostrar os testes automatizados.
 
-## 10. Relação com o enunciado e limites
+## 13. Relação com o enunciado
 
 | Requisito do documento | Onde demonstrar |
 |---|---|
-| Pelo menos duas classes de dados e duas classes de serviço | `models/` e `services/` |
+| Pelo menos duas classes de dados e duas classes de serviço | `models/` (`PecaDeRoupa` e subclasses, `Loja`, `Venda`) e `services/` (`EstoqueService`, `VendasService`) |
 | Item 1-a: destino, conjunto e quantidade no construtor do stream de saída | `streams/loja_output_stream.py` |
-| Item 1-b: saída padrão | `demos_stream/q1b.py` |
-| Item 1-c: arquivo | `demos_stream/q1c.py` |
-| Item 1-d: servidor remoto TCP | `demos_stream/q1d.py` com `demos_stream/q2d.py` |
+| Item 1-b / 1-c / 1-d: saída padrão, arquivo, servidor TCP | `demos_stream/q1b.py`, `q1c.py`, `q1d.py` (com `q2d.py`) |
 | Item 2-a: origem no construtor do stream de entrada | `streams/loja_input_stream.py` |
-| Item 2-b: entrada padrão | `demos_stream/q2b.py` |
-| Item 2-c: arquivo | `demos_stream/q2c.py` |
-| Item 2-d: cliente remoto TCP | `demos_stream/q2d.py` com `demos_stream/q1d.py` |
-| Item 3: serialização e comunicação cliente-servidor por sockets | `serialization/client.py`, `serialization/server.py`, `serialization/protocolo.py` |
-| Item 3-a: request/reply empacotados e desempacotados nos dois lados | `serialization/protocolo.py`, `client.py` e `server.py` |
-
-A documentação e os comandos descrevem como executar os testes manuais; para confirmar o funcionamento no ambiente de entrega, execute cada teste e registre as saídas observadas. Este repositório não implementa o item 4 de multicast nem a questão extra de votação.
+| Item 2-b / 2-c / 2-d: entrada padrão, arquivo, cliente TCP | `demos_stream/q2b.py`, `q2c.py`, `q2d.py` (com `q1d.py`) |
+| Item 3 e 3-a: serialização, request/reply empacotados e desempacotados nos dois lados | `serialization/protocolo.py`, `client.py`, `server.py` |
+| Item 4-a: grupo classe D com porta fixa, joinGroup/leaveGroup | `multicast/grupo.py`, comandos `entrar`/`sair` do cliente |
+| Item 4-b: NOTIFICACAO, ALERTA e ATUALIZACAO em JSON | `multicast/mensagens.py`, `multicast/servidor.py` |
+| Item 4-c: múltiplos clientes recebendo simultaneamente | `multicast/demo.py`, vários `multicast.cliente` |
+| Item 4-d: thread de escuta + thread de interação; servidor multithread | `multicast/cliente.py`, `multicast/servidor.py` (seção 8.3) |
+| Item 4-e: TCP para autenticação, UDP multicast para mensagens | `multicast/servidor.py` (`AUTENTICAR`) e `publicar()` |
+| Extra: login, candidatos e votos via TCP; prazo; apuração; admin; notas via multicast; servidor multithread; JSON | `votacao/` (seção 9) |
+| Testes | `tests/` (seção 10) |

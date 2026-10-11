@@ -1,5 +1,4 @@
 """
-
 Em Java seria:  class LojaInputStream extends InputStream
 Em Python:      class LojaInputStream(io.RawIOBase)   (stream binário de entrada)
 

@@ -1,3 +1,4 @@
+
 class Loja:
 
     def __init__(self, nome, cnpj, pecas=None):

@@ -2,7 +2,7 @@
 Q2-d: origem = cliente remoto (TCP).  Este programa é o SERVIDOR que recebe.
 (Também serve como o "servidor remoto" da Q1-d.)
 
-    python -m demos_streams.q2d_servidor_tcp [porta]      (Ctrl+C para parar)
+    python3 -m demos_stream.q2d [porta]      (Ctrl+C para parar)
 """
 
 import socket

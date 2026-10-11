@@ -1,8 +1,8 @@
 """
 Q1-b: destino = saída padrão (System.out).
 
-    python -m demos_streams.q1b_stdout                 -> mostra os bytes em hexadecimal
-    python -m demos_streams.q1b_stdout | python -m demos_streams.q2b_stdin
+    python3 -m demos_stream.q1b                 -> mostra os bytes em hexadecimal
+    python3 -m demos_stream.q1b | python3 -m demos_stream.q2b
                                                        -> envia bytes REAIS para a entrada padrão do outro programa
 """
 

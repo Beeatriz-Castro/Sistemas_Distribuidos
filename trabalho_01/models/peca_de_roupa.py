@@ -1,5 +1,3 @@
-
-
 class PecaDeRoupa:
     ROTULO_DETALHE = "detalhe" 
     def __init__(self, codigo, nome, marca, tamanho, cor, preco, quantidade):
@@ -37,7 +35,6 @@ class PecaDeRoupa:
                 f"tam {self.tamanho} | cor {self.cor} | R$ {self.preco:.2f} | "
                 f"estoque {self.quantidade} | {self.ROTULO_DETALHE}: {self.detalhe}")
 
-
 class Camiseta(PecaDeRoupa):
     ROTULO_DETALHE = "manga"
 
@@ -48,7 +45,6 @@ class Camiseta(PecaDeRoupa):
     @property
     def detalhe(self):
         return self.manga
-
 
 class Calca(PecaDeRoupa):
     ROTULO_DETALHE = "modelo"
@@ -61,7 +57,6 @@ class Calca(PecaDeRoupa):
     def detalhe(self):
         return self.modelo
 
-
 class Vestido(PecaDeRoupa):
     ROTULO_DETALHE = "comprimento"
 
@@ -73,7 +68,6 @@ class Vestido(PecaDeRoupa):
     def detalhe(self):
         return self.comprimento
 
-
 class Jaqueta(PecaDeRoupa):
     ROTULO_DETALHE = "material"
 
@@ -83,7 +77,6 @@ class Jaqueta(PecaDeRoupa):
     @property
     def detalhe(self):
         return self.material
-
 
 class Acessorio(PecaDeRoupa):
     ROTULO_DETALHE = "categoria"
@@ -96,8 +89,6 @@ class Acessorio(PecaDeRoupa):
     def detalhe(self):
         return self.categoria
 
-
-# para desempacotar
 TIPOS_DE_PECA = {
     classe.__name__: classe
     for classe in (Camiseta, Calca, Vestido, Jaqueta, Acessorio)

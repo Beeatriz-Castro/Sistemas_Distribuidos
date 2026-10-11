@@ -24,7 +24,6 @@ FORMATO BINÁRIO (big-endian, igual ao DataOutputStream do Java):
 import io
 import struct
 
-
 class LojaOutputStream(io.RawIOBase):
 
     def __init__(self, destino, pecas, quantidade):
@@ -34,9 +33,10 @@ class LojaOutputStream(io.RawIOBase):
         quantidade : quantos objetos da lista serão enviados
         """
         super().__init__()
-        if quantidade < 0 or quantidade > len(pecas):
-            raise ValueError(f"quantidade ({quantidade}) deve estar entre 0 e {len(pecas)}")
         self.destino = destino
+        if quantidade < 0 or quantidade > len(pecas):
+            self.destino = None  # nada a descarregar quando o objeto for finalizado
+            raise ValueError(f"quantidade ({quantidade}) deve estar entre 0 e {len(pecas)}")
         self.pecas = pecas
         self.quantidade = quantidade
 
@@ -48,7 +48,7 @@ class LojaOutputStream(io.RawIOBase):
         return len(dados)
 
     def flush(self):
-        if not self.closed and hasattr(self.destino, "flush"):
+        if not self.closed and self.destino is not None and hasattr(self.destino, "flush"):
             self.destino.flush()
 
     def close(self):

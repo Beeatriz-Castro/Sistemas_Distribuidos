@@ -117,6 +117,9 @@ class OuvinteNotas:
             pass
         self._sock.close()
 
+
+# ======================= interface de texto =======================
+
 def _mostrar_candidatos(candidatos):
     print("Candidatos:")
     for candidato in candidatos:

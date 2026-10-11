@@ -1,8 +1,8 @@
 """
 Q2-b: origem = entrada padrão (System.in).
 
-    python3 -m demos_stream.q1b | python3 -m demos_stream.q2b
-    python3 -m demos_stream.q2b < dados/pecas.bin
+    python -m demos_streams.q1b_stdout | python -m demos_streams.q2b_stdin
+    python -m demos_streams.q2b_stdin < dados/pecas.bin
 """
 
 import sys
