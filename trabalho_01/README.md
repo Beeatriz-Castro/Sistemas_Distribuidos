@@ -1,5 +1,6 @@
 # Sistema de Gestão de Loja de Roupas — Trabalho 1 de Sistemas Distribuídos
-
+## Vídeo do projeto
+[Link: https://drive.google.com/file/d/1Cfvdt3bBNvvsBQSpa2OxZ6cGfi-MSTsZ/view?usp=drivesdk(https://drive.google.com/file/d/1Cfvdt3bBNvvsBQSpa2OxZ6cGfi-MSTsZ/view?usp=drivesdk)](https://drive.google.com/file/d/1Cfvdt3bBNvvsBQSpa2OxZ6cGfi-MSTsZ/view?usp=drivesdk)
 ## 1. Sobre o projeto
 
 O serviço remoto escolhido é um sistema simples de gestão de uma loja de roupas (peças, estoque e vendas). Ele serve de contexto para demonstrar mecanismos de **comunicação entre processos** em Python:
